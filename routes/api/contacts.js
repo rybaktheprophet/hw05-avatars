@@ -1,34 +1,44 @@
-const express = require("express");
-
-const ctrl = require("../../controllers/contacts.js");
-
-const { schemas } = require("../../models/contact.js");
-const { isValidId, authenticate, validateBody } = require("../../middlewares");
-
+const express = require('express');
 const router = express.Router();
 
-router.get("/", authenticate, ctrl.getAllContacts);
+const findContactById = require('../../controllers/contacts/findContactById');
+const addContact = require('../../controllers/contacts/addContact');
+const deleteContact = require('../../controllers/contacts/deleteContact');
+const updateContact = require('../../controllers/contacts/updateContact');
+const contactList = require('../../controllers/contacts/contactList');
+const updateFavorite = require('../../controllers/contacts/updateFavorite');
 
-router.get("/:contactId", authenticate, isValidId, ctrl.getById);
+const validate = require('../../middlewares/validator');
+const isValidId = require('../../middlewares/isValidId');
+const upload = require('../../middlewares/upload')
 
-router.post("/", authenticate, validateBody(schemas.addSchema), ctrl.addMyContact);
+const schemas = require('../../shema/shema');
+const { updateFavoriteSchema } = require('../../shema/shema');
+const authenticate = require('../../middlewares/authenticate');
 
-router.delete("/:contactId", authenticate, isValidId, ctrl.deleteContact);
+
+router.get('/', authenticate, contactList);
+
+router.get('/:contactId', authenticate, isValidId, findContactById);
+
+router.post('/',upload.single("avatars"), authenticate, validate.validate(schemas.addSchema), addContact);
+
+router.delete('/:contactId', authenticate, isValidId, deleteContact);
 
 router.put(
-	"/:contactId",
-	authenticate,
-	isValidId,
-	validateBody(schemas.updateSchema),
-	ctrl.updateTheContact,
+  '/:contactId',
+  authenticate,
+  isValidId,
+  validate.validate(schemas.addSchema),
+  updateContact
 );
 
 router.patch(
-	"/:contactId/favorite",
-	authenticate,
-	isValidId,
-	validateBody(schemas.updateFavoriteSchema),
-	ctrl.updateTheFavorite,
+  '/:contactId/favorite',
+  authenticate,
+  isValidId,
+  validate.validateFavorite(updateFavoriteSchema),
+  updateFavorite
 );
 
 module.exports = router;

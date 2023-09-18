@@ -1,16 +1,21 @@
-const multer = require("multer");
-const path = require("path");
+const multer = require('multer');
+const path = require('path');
 
-const tempDir = path.join(__dirname, "../", "temp");
+const destination = path.resolve('tmp');
 
-const multerConfig = multer.diskStorage({
-	destination: tempDir,
-	filename: (__, file, cb) => {
-		cb(null, file.originalname);
-	},
+const storage = multer.diskStorage({
+  destination,
+  filename: (req, file, cb) => {
+    const uniquePreffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+    const { originalname } = file;
+
+    const filename = `${uniquePreffix}_${originalname}`;
+    cb(null, filename);
+  },
 });
+
 const upload = multer({
-	storage: multerConfig,
+  storage,
 });
 
 module.exports = upload;

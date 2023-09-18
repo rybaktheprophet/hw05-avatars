@@ -1,15 +1,23 @@
-const express = require("express");
+const express = require('express');
+const { validate, validateAuth } = require('../../middlewares/validator');
+const schemas = require('../../shema/shema');
+
+const currentUser = require('../../controllers/users/currentUser');
+const authenticate = require('../../middlewares/authenticate');
+const logout = require('../../controllers/users/logout');
+const login = require('../../controllers/users/login');
+const register = require('../../controllers/users/register');
+const updateAvatarUser = require('../../controllers/users/updateAvtar');
+const upload = require('../../middlewares/upload');
+
 const router = express.Router();
 
-const { validateBody, authenticate, checkSubscription, upload } = require("../../middlewares");
-const { schemas } = require("../../models/user");
-const ctrl = require("../../controllers/auth");
+router.post('/register', validate(schemas.registerSchema), register);
+router.post('/login', validateAuth(schemas.loginSchema), login);
 
-router.post("/register", validateBody(schemas.registerSchema), ctrl.register);
-router.post("/login", validateBody(schemas.loginSchema), ctrl.login);
-router.get("/current", authenticate, ctrl.current);
-router.post("/logout", authenticate, ctrl.logout);
-router.patch("/", authenticate, validateBody(schemas.updateSchema), checkSubscription, ctrl.update);
-router.patch("/avatars", authenticate, upload.single("avatar"), ctrl.updateAvatar);
+router.post('/logout', authenticate, logout);
+router.get('/current', authenticate, currentUser);
+
+router.patch('/avatars', upload.single("avatar"), authenticate, updateAvatarUser);
 
 module.exports = router;
